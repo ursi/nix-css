@@ -158,6 +158,40 @@ with builtins;
               default = "";
             };
 
+        imports' =
+          { paths =
+              l.mkOption
+                { type = t.listOf t.path;
+                  default = [];
+                };
+
+            directories =
+              l.mkOption
+                { type =
+                    t.listOf
+                      (t.submodule
+                         { options =
+                             { path = l.mkOption { type = t.path; };
+
+                               files =
+                                 l.mkOption
+                                   { type = t.listOf t.path;
+                                     description = "list of absolute paths corresponding to the paths of the files to be imported, if this directory is root";
+                                   };
+                             };
+                         }
+                      );
+
+                  default = [];
+                };
+
+            urls =
+              l.mkOption
+                { type = t.listOf t.str;
+                  default = [];
+                };
+          };
+
         rules =
           l.mkOption
             { type =
@@ -179,6 +213,7 @@ with builtins;
       { css =
           let
             set-to-str = f: set: concatStringsSep "\n" (l.mapAttrsToList f set);
+            list-to-str = f: list: concatStringsSep "\n" (map f list);
 
             make-rule = rule: dec-set:
               ''
@@ -188,8 +223,18 @@ with builtins;
               '';
 
             set-to-rules = set-to-str make-rule;
+            imps = config.imports';
           in
           ''
+          ${list-to-str (a: ''@import "${a}";'') (imps.paths ++ imps.urls)}
+
+          ${list-to-str
+              ({ path, files}:
+                 list-to-str (a: ''@import "${path}${toString a}";'') files
+              )
+              imps.directories
+          }
+
           ${set-to-rules (l.filterAttrs (n: _: !(l.hasPrefix "@" n)) config.rules)}
 
           ${set-to-str
