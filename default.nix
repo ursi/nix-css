@@ -83,7 +83,13 @@ with builtins;
                    file'd-values;
             };
       in
-      { classes =
+      { bundle =
+          l.mkOption
+            { type = t.package;
+              default = "";
+            };
+
+        classes =
           l.mkOption
             { type =
                 let
@@ -252,7 +258,29 @@ with builtins;
           }
           '';
       in
-      { css = make-css l.id;
+      { bundle =
+          let
+            make-name = path: baseNameOf "${path}";
+            css = make-css make-name;
+          in
+          p.runCommand "css" {}
+            ''
+            mkdir $out; cd $out
+
+            ${list-to-str
+                (p: "ln -s ${p} ${make-name p}")
+                imps.paths
+            }
+
+            ${list-to-str
+                (d: "ln -s ${d.path} ${make-name d.path}")
+                imps.directories
+            }
+
+            ln -s ${p.writeText "main.css" css} main.css
+            '';
+
+        css = make-css l.id;
 
         rules =
           let inherit (config) classes; in
