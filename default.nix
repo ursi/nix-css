@@ -154,6 +154,8 @@ with builtins;
 
                           extra-rules = c: { "${c} > svg".fill = "blue"; };
                         };
+
+                      c2.color = "purple";
                     };
                 };
             };
@@ -295,22 +297,24 @@ with builtins;
                    else
                      { ${"." + name}.${a.name} = a.value; };
                in
-               foldAttrs
-                 (acc: a:
-                    l.recursiveUpdate acc
-                      (if l.hasPrefix "@" a.name then
-                         { ${a.name} =
-                             foldAttrs
-                               (acc': b: l.recursiveUpdate acc' (helper b))
-                               {}
-                               a.value;
-                         }
-                       else
-                         helper a
-                      )
+               l.recursiveUpdate acc
+                 (foldAttrs
+                    (acc': a:
+                       l.recursiveUpdate acc'
+                         (if l.hasPrefix "@" a.name then
+                            { ${a.name} =
+                                foldAttrs
+                                  (acc'': b: l.recursiveUpdate acc'' (helper b))
+                                  {}
+                                  a.value;
+                            }
+                          else
+                            helper a
+                         )
+                    )
+                    {}
+                    value
                  )
-                 {}
-                 value
             )
             {}
             classes;
