@@ -200,6 +200,12 @@ with builtins;
                 };
           };
 
+        main =
+          l.mkOption
+            { type = t.str;
+              default = "main.css";
+            };
+
         rules =
           l.mkOption
             { type =
@@ -295,7 +301,7 @@ with builtins;
                 imps.directories
             }
 
-            ln -s ${p.writeText "main.css" css} main.css
+            ln -s ${p.writeText config.main css} ${config.main}
             '';
 
         rules =
