@@ -1,7 +1,7 @@
 with builtins;
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
   let
-    l = lib; t = l.types;
+    l = lib; p = pkgs; t = l.types;
 
     foldAttrs = f: init: attrs:
       foldl' f init
@@ -210,10 +210,13 @@ with builtins;
       };
 
     config =
-      { css =
+      let
+        imps = config.imports';
+        list-to-str = f: list: concatStringsSep "\n" (map f list);
+
+        make-css = handle-imports:
           let
             set-to-str = f: set: concatStringsSep "\n" (l.mapAttrsToList f set);
-            list-to-str = f: list: concatStringsSep "\n" (map f list);
 
             make-rule = rule: dec-set:
               ''
@@ -223,14 +226,14 @@ with builtins;
               '';
 
             set-to-rules = set-to-str make-rule;
-            imps = config.imports';
           in
           ''
-          ${list-to-str (a: ''@import "${a}";'') (imps.paths ++ imps.urls)}
+          ${list-to-str (a: ''@import "${a}";'') (imps.urls)}
+          ${list-to-str (a: ''@import "${handle-imports a}";'') (imps.paths)}
 
           ${list-to-str
               ({ path, files}:
-                 list-to-str (a: ''@import "${path}${toString a}";'') files
+                 list-to-str (a: ''@import "${handle-imports path}${toString a}";'') files
               )
               imps.directories
           }
@@ -248,6 +251,8 @@ with builtins;
               (l.filterAttrs (n: _: l.hasPrefix "@" n) config.rules)
           }
           '';
+      in
+      { css = make-css l.id;
 
         rules =
           let inherit (config) classes; in
