@@ -112,10 +112,7 @@ with builtins;
                         type = css-value;
                       }
 
-                      { description = ''starts with ":"'';
-                        check = n: l.hasPrefix ":" n;
-                        type = css-properties;
-                      }
+                      (prefix-check ":" css-properties)
 
                       { description = ''"extra-rules"'';
                         check = n: n == "extra-rules";
@@ -125,13 +122,7 @@ with builtins;
                 in
                 t.attrsOf
                   (checked-attrs
-                     ([ { description = ''starts with "@"'';
-                          check = l.hasPrefix "@";
-                          type = checked-attrs checks;
-                        }
-                      ]
-                      ++ checks
-                     )
+                     ([ (prefix-check "@" (checked-attrs checks)) ] ++ checks)
                   );
 
               default = {};
@@ -222,10 +213,7 @@ with builtins;
                       type =  css-properties;
                     }
 
-                    { description = ''starts with an "@"'';
-                      check = l.hasPrefix "@";
-                      type = t.attrsOf css-properties;
-                    }
+                    (prefix-check "@" (t.attrsOf css-properties))
                   ];
             };
 
