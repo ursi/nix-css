@@ -160,7 +160,7 @@ with builtins;
                 };
             };
 
-        css =
+        extra-css =
           l.mkOption
             { type = t.lines;
               default = "";
@@ -218,52 +218,51 @@ with builtins;
       };
 
     config =
-      let
-        imps = config.imports';
-        list-to-str = f: list: concatStringsSep "\n" (map f list);
-
-        make-css = handle-imports:
-          let
-            set-to-str = f: set: concatStringsSep "\n" (l.mapAttrsToList f set);
-
-            make-rule = rule: dec-set:
-              ''
-              ${rule} {
-                ${set-to-str (n: v: "${n}: ${toString v};") dec-set}
-              }
-              '';
-
-            set-to-rules = set-to-str make-rule;
-          in
-          ''
-          ${list-to-str (a: ''@import "${a}";'') (imps.urls)}
-          ${list-to-str (a: ''@import "${handle-imports a}";'') (imps.paths)}
-
-          ${list-to-str
-              ({ path, files}:
-                 list-to-str (a: ''@import "${handle-imports path}${toString a}";'') files
-              )
-              imps.directories
-          }
-
-          ${set-to-rules (l.filterAttrs (n: _: !(l.hasPrefix "@" n)) config.rules)}
-
-          ${set-to-str
-              (n: v:
-                 ''
-                 ${n} {
-                   ${set-to-rules v}
-                 }
-                 ''
-              )
-              (l.filterAttrs (n: _: l.hasPrefix "@" n) config.rules)
-          }
-          '';
-      in
       { bundle =
           let
+            imps = config.imports';
+            list-to-str = f: list: concatStringsSep "\n" (map f list);
             make-name = path: baseNameOf "${path}";
-            css = make-css make-name;
+
+            css =
+              let
+                set-to-str = f: set: concatStringsSep "\n" (l.mapAttrsToList f set);
+
+                make-rule = rule: dec-set:
+                  ''
+                  ${rule} {
+                    ${set-to-str (n: v: "${n}: ${toString v};") dec-set}
+                  }
+                  '';
+
+                set-to-rules = set-to-str make-rule;
+              in
+              ''
+              ${list-to-str (a: ''@import "${a}";'') (imps.urls)}
+              ${list-to-str (a: ''@import "${make-name a}";'') (imps.paths)}
+
+              ${list-to-str
+                  ({ path, files}:
+                     list-to-str (a: ''@import "${make-name path}${toString a}";'') files
+                  )
+                  imps.directories
+              }
+
+              ${set-to-rules (l.filterAttrs (n: _: !(l.hasPrefix "@" n)) config.rules)}
+
+              ${set-to-str
+                  (n: v:
+                     ''
+                     ${n} {
+                       ${set-to-rules v}
+                     }
+                     ''
+                  )
+                  (l.filterAttrs (n: _: l.hasPrefix "@" n) config.rules)
+              }
+
+              ${config.extra-css}
+              '';
           in
           p.runCommand "css" {}
             ''
@@ -281,8 +280,6 @@ with builtins;
 
             ln -s ${p.writeText "main.css" css} main.css
             '';
-
-        css = make-css l.id;
 
         rules =
           let inherit (config) classes; in
