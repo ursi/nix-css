@@ -82,6 +82,19 @@ with builtins;
                    )
                    file'd-values;
             };
+
+        prefix-check = prefix: type:
+          { description = ''starts with "${prefix}"'';
+            check = l.hasPrefix prefix;
+            inherit type;
+          };
+
+        prefixed-str = prefix:
+          l.mkOptionType
+            { name = "prefixed-str";
+              description = ''a string prefixed with "${prefix}"'';
+              check = l.hasPrefix prefix;
+            };
       in
       { bundle =
           l.mkOption
@@ -215,6 +228,26 @@ with builtins;
                     }
                   ];
             };
+
+        variables =
+          { values =
+              l.mkOption
+                { type = t.attrsOf css-value;
+                  default = {};
+                };
+
+            vars =
+              l.mkOption
+                { type = t.attrsOf (prefixed-str "var(--");
+                  default = {};
+                };
+
+            declarations =
+              l.mkOption
+                { type = checked-attrs [ (prefix-check "--" css-value) ];
+                  default = {};
+                };
+          };
       };
 
     config =
@@ -283,37 +316,52 @@ with builtins;
 
         rules =
           let inherit (config) classes; in
-          foldAttrs
-            (acc: { name, value }:
-               let
-                 helper = a:
-                   if l.hasPrefix ":" a.name then
-                     { ${"." + name + a.name} = a.value; }
-                   else if a.name == "extra-rules" then
-                     a.value
-                   else
-                     { ${"." + name}.${a.name} = a.value; };
-               in
-               l.recursiveUpdate acc
-                 (foldAttrs
-                    (acc': a:
-                       l.recursiveUpdate acc'
-                         (if l.hasPrefix "@" a.name then
-                            { ${a.name} =
-                                foldAttrs
-                                  (acc'': b: l.recursiveUpdate acc'' (helper b))
-                                  {}
-                                  a.value;
-                            }
-                          else
-                            helper a
-                         )
+          l.recursiveUpdate
+            { body = config.variables.declarations; }
+            (foldAttrs
+               (acc: { name, value }:
+                  let
+                    helper = a:
+                      if l.hasPrefix ":" a.name then
+                        { ${"." + name + a.name} = a.value; }
+                      else if a.name == "extra-rules" then
+                        a.value
+                      else
+                        { ${"." + name}.${a.name} = a.value; };
+                  in
+                  l.recursiveUpdate acc
+                    (foldAttrs
+                       (acc': a:
+                          l.recursiveUpdate acc'
+                            (if l.hasPrefix "@" a.name then
+                               { ${a.name} =
+                                   foldAttrs
+                                     (acc'': b: l.recursiveUpdate acc'' (helper b))
+                                     {}
+                                     a.value;
+                               }
+                             else
+                               helper a
+                            )
+                       )
+                       {}
+                       value
                     )
-                    {}
-                    value
-                 )
-            )
-            {}
-            classes;
+               )
+               {}
+               classes
+            );
+
+        variables =
+          { declarations =
+              l.mapAttrs'
+                (n: v: l.nameValuePair ("--" + n) v)
+                config.variables.values;
+
+            vars =
+              l.mapAttrs
+                (n: _: "var(--${n})")
+                config.variables.values;
+          };
       };
   }
