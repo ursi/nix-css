@@ -152,7 +152,11 @@ with builtins;
                 };
             };
 
-        css = l.mkOption { type = t.lines; };
+        css =
+          l.mkOption
+            { type = t.lines;
+              default = "";
+            };
 
         rules =
           l.mkOption
