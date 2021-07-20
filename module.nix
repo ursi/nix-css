@@ -166,7 +166,7 @@ with builtins;
               default = "";
             };
 
-        imports' =
+        css-imports =
           { paths =
               l.mkOption
                 { type = t.listOf t.path;
@@ -243,7 +243,7 @@ with builtins;
     config =
       { bundle =
           let
-            imps = config.imports';
+            imps = config.css-imports;
             list-to-str = f: list: concatStringsSep "\n" (map f list);
             make-name = path: baseNameOf "${path}";
 
