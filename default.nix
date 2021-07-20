@@ -96,11 +96,7 @@ with builtins;
               check = l.hasPrefix prefix;
             };
       in
-      { bundle =
-          l.mkOption
-            { type = t.package;
-              default = "";
-            };
+      { bundle = l.mkOption { type = t.package; };
 
         classes =
           l.mkOption
