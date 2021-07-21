@@ -3,17 +3,28 @@ with builtins;
   let
     l = lib; p = pkgs; t = l.types;
 
+    allAttrs = f: attrs: all f (l.mapAttrsToList l.nameValuePair attrs);
+
     foldAttrs = f: init: attrs:
       foldl' f init
         (l.mapAttrsToList l.nameValuePair attrs);
   in
   { options =
       let
+        attrsOf = type:
+          t.attrsOf type
+          // { check = a:
+                 if isAttrs a then
+                   allAttrs (b: type.check b.value) a
+                 else
+                   false;
+             };
+
         css-value =
           let atom = t.oneOf [ t.str t.int t.float ]; in
           t.either atom (t.listOf atom);
 
-        css-properties = t.attrsOf css-value;
+        css-properties = attrsOf css-value;
 
         extra-rules-type =
           l.mkOptionType
@@ -116,7 +127,7 @@ with builtins;
                       }
                     ];
                 in
-                t.attrsOf
+                attrsOf
                   (checked-attrs
                      ([ (prefix-check "@" (checked-attrs checks)) ] ++ checks)
                   );
@@ -223,7 +234,7 @@ with builtins;
           { values =
               l.mkOption
                 { type =
-                    t.attrsOf
+                    attrsOf
                       (t.either
                          css-value
                          (checked-attrs [ (prefix-check "@" css-value) ])
@@ -234,7 +245,7 @@ with builtins;
 
             vars =
               l.mkOption
-                { type = t.attrsOf (prefixed-str "var(--");
+                { type = attrsOf (prefixed-str "var(--");
                   default = {};
                 };
 
