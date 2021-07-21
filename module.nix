@@ -33,7 +33,14 @@ with builtins;
 
               check = f:
                 if isFunction f then
-                  css-properties.check (f "")
+                  (attrsOf
+                     (checked-attrs
+                        [ (no-prefix-check "@" css-value)
+                          (prefix-check "@" css-properties)
+                        ]
+                     )
+                  )
+                  .check (f "")
                 else
                   false;
 
@@ -100,6 +107,12 @@ with builtins;
             inherit type;
           };
 
+        no-prefix-check = prefix: type:
+          { description = ''does not start with "${prefix}"'';
+            check = n: !(l.hasPrefix prefix n);
+            inherit type;
+          };
+
         prefixed-str = prefix:
           l.mkOptionType
             { name = "prefixed-str";
@@ -107,7 +120,13 @@ with builtins;
               check = l.hasPrefix prefix;
             };
       in
-      { bundle = l.mkOption { type = t.package; };
+      { at-rules =
+          l.mkOption
+            { type = checked-attrs [ (prefix-check "@" (attrsOf css-properties)) ];
+              default = {};
+            };
+
+        bundle = l.mkOption { type = t.package; };
 
         classes =
           l.mkOption
@@ -120,16 +139,19 @@ with builtins;
                       }
 
                       (prefix-check ":" css-properties)
-
-                      { description = ''"extra-rules"'';
-                        check = n: n == "extra-rules";
-                        type = extra-rules-type;
-                      }
                     ];
                 in
                 attrsOf
                   (checked-attrs
-                     ([ (prefix-check "@" (checked-attrs checks)) ] ++ checks)
+                     ([ (prefix-check "@" (checked-attrs checks))
+
+                        { description = ''"extra-rules"'';
+                          check = n: n == "extra-rules";
+                          type = extra-rules-type;
+                        }
+                      ]
+                      ++ checks
+                     )
                   );
 
               default = {};
@@ -138,17 +160,7 @@ with builtins;
                 mapAttrs
                   (class-name:
                      let selector = "." + class-name; in
-                     mapAttrs
-                       (n: v:
-                          if n == "extra-rules" then
-                            v selector
-                          else if l.hasPrefix "@" n then
-                            mapAttrs
-                              (n': v': if n' == "extra-rules" then v' selector else v')
-                              v
-                          else
-                            v
-                       )
+                     mapAttrs (n: v: if n == "extra-rules" then v selector else v)
                   );
 
               example =
@@ -160,10 +172,14 @@ with builtins;
                           "@media (min-width: 1000px)" =
                             { display = "flex";
                               ":hover".background = "green";
-                              extra-rules = c: { "${c} + ${c}".margin-top = "5px"; };
                             };
 
-                          extra-rules = c: { "${c} > svg".fill = "blue"; };
+                          extra-rules = c:
+                            { "${c} > svg" =
+                                { fill = "blue";
+                                  ${mobile}.width = "10px";
+                                };
+                            };
                         };
 
                       c2.color = "purple";
@@ -220,14 +236,14 @@ with builtins;
         rules =
           l.mkOption
             { type =
-                checked-attrs
-                  [ { description = ''doesn't start with "@"'';
-                      check = n: !(l.hasPrefix "@" n);
-                      type =  css-properties;
-                    }
+                attrsOf
+                  (checked-attrs
+                     [ (no-prefix-check "@" css-value)
+                       (prefix-check "@" css-properties)
+                     ]
+                  );
 
-                    (prefix-check "@" (t.attrsOf css-properties))
-                  ];
+              default = {};
             };
 
         variables =
@@ -258,7 +274,41 @@ with builtins;
       };
 
     config =
-      { bundle =
+      { at-rules =
+          l.recursiveUpdate
+            (foldAttrs
+                  (acc: { name, value }:
+                     l.recursiveUpdate acc
+                       (foldAttrs
+                          (acc': a:
+                             acc' // { ${a.name}.body.${"--" + name} = a.value; }
+                          )
+                          {}
+                          value
+                       )
+                  )
+                  {}
+                  (l.filterAttrs (_: isAttrs) config.variables.values)
+            )
+            (foldAttrs
+               (acc: { name, value }:
+                  l.recursiveUpdate acc
+                    (foldAttrs
+                       (acc': a:
+                          if l.hasPrefix "@" a.name then
+                            l.recursiveUpdate acc' { ${a.name}.${name} = a.value; }
+                          else
+                            acc'
+                       )
+                       {}
+                       value
+                    )
+               )
+               {}
+               config.rules
+            );
+
+        bundle =
           let
             imps = config.css-imports;
             list-to-str = f: list: concatStringsSep "\n" (map f list);
@@ -288,7 +338,9 @@ with builtins;
                   imps.directories
               }
 
-              ${set-to-rules (l.filterAttrs (n: _: !(l.hasPrefix "@" n)) config.rules)}
+              ${set-to-rules
+                  (mapAttrs (_: l.filterAttrs (_: v: !(isAttrs v))) config.rules)
+              }
 
               ${set-to-str
                   (n: v:
@@ -298,7 +350,7 @@ with builtins;
                      }
                      ''
                   )
-                  (l.filterAttrs (n: _: l.hasPrefix "@" n) config.rules)
+                  (config.at-rules)
               }
 
               ${config.extra-css}
@@ -332,20 +384,6 @@ with builtins;
                       config.variables.values
                    );
              }
-             // (foldAttrs
-                   (acc: { name, value }:
-                      l.recursiveUpdate acc
-                        (foldAttrs
-                           (acc': a:
-                              acc' // { ${a.name}.body.${"--" + name} = a.value; }
-                           )
-                           {}
-                           value
-                        )
-                   )
-                   {}
-                   (l.filterAttrs (_: isAttrs) config.variables.values)
-                )
             )
             (foldAttrs
                (acc: { name, value }:
@@ -363,12 +401,13 @@ with builtins;
                        (acc': a:
                           l.recursiveUpdate acc'
                             (if l.hasPrefix "@" a.name then
-                               { ${a.name} =
-                                   foldAttrs
-                                     (acc'': b: l.recursiveUpdate acc'' (helper b))
-                                     {}
-                                     a.value;
-                               }
+                               foldAttrs
+                                 (acc'': b:
+                                    l.recursiveUpdate acc''
+                                      (mapAttrs (_: v: { ${a.name} = v; }) (helper b))
+                                 )
+                                 {}
+                                 a.value
                              else
                                helper a
                             )
