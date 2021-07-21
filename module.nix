@@ -222,7 +222,13 @@ with builtins;
         variables =
           { values =
               l.mkOption
-                { type = t.attrsOf css-value;
+                { type =
+                    t.attrsOf
+                      (t.either
+                         css-value
+                         (checked-attrs [ (prefix-check "@" css-value) ])
+                      );
+
                   default = {};
                 };
 
@@ -307,7 +313,29 @@ with builtins;
         rules =
           let inherit (config) classes; in
           l.recursiveUpdate
-            { body = config.variables.declarations; }
+            ({ body =
+                 l.mapAttrs'
+                   (n: v: l.nameValuePair ("--" + n) v)
+                   (l.filterAttrs
+                      (_: v: !(isAttrs v))
+                      config.variables.values
+                   );
+             }
+             // (foldAttrs
+                   (acc: { name, value }:
+                      l.recursiveUpdate acc
+                        (foldAttrs
+                           (acc': a:
+                              acc' // { ${a.name}.body.${"--" + name} = a.value; }
+                           )
+                           {}
+                           value
+                        )
+                   )
+                   {}
+                   (l.filterAttrs (_: isAttrs) config.variables.values)
+                )
+            )
             (foldAttrs
                (acc: { name, value }:
                   let
