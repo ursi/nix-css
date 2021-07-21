@@ -10,7 +10,7 @@ with builtins;
   in
   { options =
       let
-        attrsOf = type:
+        attrs-of = type:
           t.attrsOf type
           // { check = a:
                  if isAttrs a then
@@ -23,7 +23,7 @@ with builtins;
           let atom = t.oneOf [ t.str t.int t.float ]; in
           t.either atom (t.listOf atom);
 
-        declarations = attrsOf css-value;
+        declarations = attrs-of css-value;
 
         extra-rules-type =
           l.mkOptionType
@@ -32,7 +32,7 @@ with builtins;
 
               check = f:
                 if isFunction f then
-                  (attrsOf
+                  (attrs-of
                      (checked-attrs
                         [ (no-prefix-check "@" css-value)
                           (prefix-check "@" declarations)
@@ -121,7 +121,7 @@ with builtins;
       in
       { at-rules =
           l.mkOption
-            { type = checked-attrs [ (prefix-check "@" (attrsOf declarations)) ];
+            { type = checked-attrs [ (prefix-check "@" (attrs-of declarations)) ];
               default = {};
             };
 
@@ -140,7 +140,7 @@ with builtins;
                       (prefix-check ":" declarations)
                     ];
                 in
-                attrsOf
+                attrs-of
                   (checked-attrs
                      ([ (prefix-check "@" (checked-attrs checks))
 
@@ -235,7 +235,7 @@ with builtins;
         rules =
           l.mkOption
             { type =
-                attrsOf
+                attrs-of
                   (checked-attrs
                      [ (no-prefix-check "@" css-value)
                        (prefix-check "@" declarations)
@@ -249,7 +249,7 @@ with builtins;
           { values =
               l.mkOption
                 { type =
-                    attrsOf
+                    attrs-of
                       (t.either
                          css-value
                          (checked-attrs [ (prefix-check "@" css-value) ])
@@ -260,7 +260,7 @@ with builtins;
 
             vars =
               l.mkOption
-                { type = attrsOf (prefixed-str "var(--");
+                { type = attrs-of (prefixed-str "var(--");
                   default = {};
                 };
 
