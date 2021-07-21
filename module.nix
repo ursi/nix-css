@@ -24,19 +24,19 @@ with builtins;
           let atom = t.oneOf [ t.str t.int t.float ]; in
           t.either atom (t.listOf atom);
 
-        css-properties = attrsOf css-value;
+        declarations = attrsOf css-value;
 
         extra-rules-type =
           l.mkOptionType
             { name = "extra-rules-type";
-              description = "function from string to ${css-properties.description}";
+              description = "function from string to ${declarations.description}";
 
               check = f:
                 if isFunction f then
                   (attrsOf
                      (checked-attrs
                         [ (no-prefix-check "@" css-value)
-                          (prefix-check "@" css-properties)
+                          (prefix-check "@" declarations)
                         ]
                      )
                   )
@@ -122,7 +122,7 @@ with builtins;
       in
       { at-rules =
           l.mkOption
-            { type = checked-attrs [ (prefix-check "@" (attrsOf css-properties)) ];
+            { type = checked-attrs [ (prefix-check "@" (attrsOf declarations)) ];
               default = {};
             };
 
@@ -138,7 +138,7 @@ with builtins;
                         type = css-value;
                       }
 
-                      (prefix-check ":" css-properties)
+                      (prefix-check ":" declarations)
                     ];
                 in
                 attrsOf
@@ -239,7 +239,7 @@ with builtins;
                 attrsOf
                   (checked-attrs
                      [ (no-prefix-check "@" css-value)
-                       (prefix-check "@" css-properties)
+                       (prefix-check "@" declarations)
                      ]
                   );
 
