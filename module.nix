@@ -6,8 +6,7 @@ with builtins;
     allAttrs = f: attrs: all f (l.mapAttrsToList l.nameValuePair attrs);
 
     foldAttrs = f: init: attrs:
-      foldl' f init
-        (l.mapAttrsToList l.nameValuePair attrs);
+      foldl' f init (l.mapAttrsToList l.nameValuePair attrs);
   in
   { options =
       let
@@ -68,11 +67,11 @@ with builtins;
 
               check = attrs:
                 isAttrs attrs
-                && all
+                && allAttrs
                      ({ name, value }:
                         any (a: a.check name && a.type.check value) checks
                      )
-                     (l.mapAttrsToList l.nameValuePair attrs);
+                     attrs;
 
               merge = loc: defs:
                 let
@@ -377,17 +376,15 @@ with builtins;
             '';
 
         rules =
-          let inherit (config) classes; in
           l.recursiveUpdate
-            ({ body =
-                 l.mapAttrs'
-                   (n: v: l.nameValuePair ("--" + n) v)
-                   (l.filterAttrs
-                      (_: v: !(isAttrs v))
-                      config.variables.values
-                   );
-             }
-            )
+            { body =
+                l.mapAttrs'
+                  (n: v: l.nameValuePair ("--" + n) v)
+                  (l.filterAttrs
+                     (_: v: !(isAttrs v))
+                     config.variables.values
+                  );
+            }
             (foldAttrs
                (acc: { name, value }:
                   let
@@ -420,7 +417,7 @@ with builtins;
                     )
                )
                {}
-               classes
+               config.classes
             );
 
         variables =
