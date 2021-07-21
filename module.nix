@@ -319,11 +319,14 @@ with builtins;
                 set-to-str = f: set: concatStringsSep "\n" (l.mapAttrsToList f set);
 
                 make-rule = rule: dec-set:
-                  ''
-                  ${rule} {
-                    ${set-to-str (n: v: "${n}: ${toString v};") dec-set}
-                  }
-                  '';
+                  if dec-set != {} then
+                    ''
+                    ${rule} {
+                      ${set-to-str (n: v: "${n}: ${toString v};") dec-set}
+                    }
+                    ''
+                  else
+                    "";
 
                 set-to-rules = set-to-str make-rule;
               in
