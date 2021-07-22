@@ -10,7 +10,11 @@
 }:
   (pkgs.lib.evalModules
      { modules =
-         [ { _module.args = { inherit pkgs; }; }
+         [ { _module.args =
+               { inherit pkgs;
+                 css-lib = import ./lib.nix;
+               };
+           }
            ./module.nix
            module
          ];
