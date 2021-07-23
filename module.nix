@@ -280,7 +280,7 @@ with builtins;
                      l.recursiveUpdate acc
                        (foldAttrs
                           (acc': a:
-                             acc' // { ${a.name}.body.${"--" + name} = a.value; }
+                             acc' // { ${a.name}.":root".${"--" + name} = a.value; }
                           )
                           {}
                           value
@@ -377,7 +377,7 @@ with builtins;
 
         rules =
           l.recursiveUpdate
-            { body =
+            { ":root" =
                 l.mapAttrs'
                   (n: v: l.nameValuePair ("--" + n) v)
                   (l.filterAttrs
