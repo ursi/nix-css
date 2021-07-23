@@ -337,8 +337,8 @@ with builtins;
               in
               ''
               ${list-to-str (a: ''@charset "${a}";'') config.charsets}
-              ${list-to-str (a: ''@import "${a}";'') (imps.urls)}
-              ${list-to-str (a: ''@import "${make-name a}";'') (imps.paths)}
+              ${list-to-str (a: ''@import "${a}";'') imps.urls}
+              ${list-to-str (a: ''@import "${make-name a}";'') imps.paths}
 
               ${list-to-str
                   ({ path, files}:
