@@ -317,7 +317,10 @@ with builtins;
           let
             imps = config.css-imports;
             list-to-str = f: list: concatStringsSep "\n" (map f list);
-            make-name = path: baseNameOf "${path}";
+
+            make-name = path:
+              baseNameOf
+                (p.runCommand (baseNameOf path) {} "ln -s ${path} $out");
 
             css =
               let
