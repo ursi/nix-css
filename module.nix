@@ -127,6 +127,12 @@ with builtins;
 
         bundle = l.mkOption { type = t.package; };
 
+        charsets =
+          l.mkOption
+            { type = t.listOf t.str;
+              default = [];
+            };
+
         classes =
           l.mkOption
             { type =
@@ -330,6 +336,7 @@ with builtins;
                 set-to-rules = set-to-str make-rule;
               in
               ''
+              ${list-to-str (a: ''@charset "${a}";'') config.charsets}
               ${list-to-str (a: ''@import "${a}";'') (imps.urls)}
               ${list-to-str (a: ''@import "${make-name a}";'') (imps.paths)}
 
