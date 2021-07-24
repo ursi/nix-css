@@ -252,30 +252,16 @@ with builtins;
             };
 
         variables =
-          { values =
-              l.mkOption
-                { type =
-                    attrs-of
-                      (t.either
-                         css-value
-                         (checked-attrs [ (prefix-check "@" css-value) ])
-                      );
+          l.mkOption
+            { type =
+                attrs-of
+                  (t.either
+                     css-value
+                     (checked-attrs [ (prefix-check "@" css-value) ])
+                  );
 
-                  default = {};
-                };
-
-            vars =
-              l.mkOption
-                { type = attrs-of (prefixed-str "var(--");
-                  default = {};
-                };
-
-            declarations =
-              l.mkOption
-                { type = checked-attrs [ (prefix-check "--" css-value) ];
-                  default = {};
-                };
-          };
+              default = {};
+            };
       };
 
     config =
@@ -293,7 +279,7 @@ with builtins;
                        )
                   )
                   {}
-                  (l.filterAttrs (_: isAttrs) config.variables.values)
+                  (l.filterAttrs (_: isAttrs) config.variables)
             )
             (foldAttrs
                (acc: { name, value }:
@@ -392,7 +378,7 @@ with builtins;
                   (n: v: l.nameValuePair ("--" + n) v)
                   (l.filterAttrs
                      (_: v: !(isAttrs v))
-                     config.variables.values
+                     config.variables
                   );
             }
             (foldAttrs
@@ -429,17 +415,5 @@ with builtins;
                {}
                config.classes
             );
-
-        variables =
-          { declarations =
-              l.mapAttrs'
-                (n: v: l.nameValuePair ("--" + n) v)
-                config.variables.values;
-
-            vars =
-              l.mapAttrs
-                (n: _: "var(--${n})")
-                config.variables.values;
-          };
       };
   }
