@@ -13,5 +13,5 @@ with builtins;
       leq = px: "@media (max-width: ${toString px}px)";
     };
 
-  make-var-values = vars: mapAttrs (n: _: "var(--${n})") vars;
+  make-var-values = mapAttrs (n: _: "var(--${n})");
 }
