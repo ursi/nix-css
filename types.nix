@@ -23,24 +23,37 @@ l:
     declarations = attrs-of css-value;
 
     extra-rules-type =
+      let
+        type =
+          (attrs-of
+             (checked-attrs
+                [ (no-prefix-check "@" css-value)
+                  (prefix-check "@" declarations)
+                ]
+             )
+          );
+      in
       l.mkOptionType
         { name = "extra-rules-type";
           description = "function from string to ${declarations.description}";
 
           check = f:
-            if isFunction f then
-              (attrs-of
-                 (checked-attrs
-                    [ (no-prefix-check "@" css-value)
-                      (prefix-check "@" declarations)
-                    ]
-                 )
-              )
-              .check (f "")
-            else
-              false;
+            if isFunction f then type.check (f "class")
+            else false;
 
-          merge = l.mergeEqualOption;
+          merge = loc: defs:
+            let
+              try-merge =
+                l.pipe defs
+                  [ (map (a: a // { value = a.value "class"; }))
+                    (type.merge loc)
+                    tryEval
+                  ];
+            in
+            if try-merge.success then
+              c: type.merge loc (map (a: a // { value = a.value c; }) defs)
+            else
+              abort "merge was not successufl at ${toString loc}";
         };
 
     checked-attrs = checks:
