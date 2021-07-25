@@ -7,7 +7,9 @@ l:
   rec
   { attrs-of = type:
       t.attrsOf type
-      // { check = a:
+      // { name = "attrs-of";
+
+           check = a:
              if isAttrs a then
                allAttrs (b: type.check b.value) a
              else
