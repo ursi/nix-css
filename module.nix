@@ -31,63 +31,70 @@ with builtins;
             };
 
         classes =
-          l.mkOption
-            { type =
-                let
-                  checks =
-                    [ { description = ''doesn't start with ":" or "@"'';
-                        check = n: !(l.hasPrefix ":" n || l.hasPrefix "@" n);
-                        type = css-value;
-                      }
+          let
+            make-classes = example-property: modifier:
+              l.mkOption
+                { type =
+                    let
+                      checks =
+                        [ { description = ''doesn't start with ":" or "@"'';
+                            check = n: !(l.hasPrefix ":" n || l.hasPrefix "@" n);
+                            type = css-value;
+                          }
 
-                      (prefix-check ":" declarations)
-                    ];
-                in
-                attrs-of
-                  (checked-attrs
-                     ([ (prefix-check "@" (checked-attrs checks))
+                          (prefix-check ":" declarations)
+                        ];
+                    in
+                    attrs-of
+                      (checked-attrs
+                         ([ (prefix-check "@" (checked-attrs checks))
 
-                        { description = ''"extra-rules"'';
-                          check = n: n == "extra-rules";
-                          type = extra-rules-type;
-                        }
-                      ]
-                      ++ checks
-                     )
-                  );
+                            { description = ''"extra-rules"'';
+                              check = n: n == "extra-rules";
+                              type = extra-rules-type;
+                            }
+                          ]
+                          ++ checks
+                         )
+                      );
 
-              default = {};
+                  default = {};
 
-              apply =
-                mapAttrs
-                  (class-name:
-                     let selector = "." + class-name; in
-                     mapAttrs (n: v: if n == "extra-rules" then v selector else v)
-                  );
+                  apply =
+                    mapAttrs
+                      (class-name:
+                         let selector = modifier ".${class-name}"; in
+                         mapAttrs
+                           (n: v: if n == "extra-rules" then v selector else v)
+                      );
 
-              example =
-                { classes =
-                    { c1 =
-                        { background = "red";
-                          ":hover".background = "blue";
+                  example =
+                    { classes.${example-property} =
+                        { c1 =
+                            { background = "red";
+                              ":hover".background = "blue";
 
-                          "@media (min-width: 1000px)" =
-                            { display = "flex";
-                              ":hover".background = "green";
-                            };
+                              "@media (min-width: 1000px)" =
+                                { display = "flex";
+                                  ":hover".background = "green";
+                                };
 
-                          extra-rules = c:
-                            { "${c} > svg" =
-                                { fill = "blue";
-                                  ${mobile}.width = "10px";
+                              extra-rules = c:
+                                { "${c} > svg" =
+                                    { fill = "blue";
+                                      ${mobile}.width = "10px";
+                                    };
                                 };
                             };
-                        };
 
-                      c2.color = "purple";
+                          c2.color = "purple";
+                        };
                     };
                 };
-            };
+          in
+          { low-spec = make-classes "low-spec" l.id;
+            high-spec = make-classes "high-spec" (s: s + s);
+          };
 
         extra-css =
           l.mkOption
@@ -269,48 +276,54 @@ with builtins;
             '';
 
         rules =
-          l.recursiveUpdate
-            { ":root" =
-                l.mapAttrs'
-                  (n: v: l.nameValuePair ("--" + n) v)
-                  (l.filterAttrs
-                     (_: v: !(isAttrs v))
-                     config.variables
-                  );
-            }
-            (foldAttrs
-               (acc: { name, value }:
-                  let
-                    helper = a:
-                      if l.hasPrefix ":" a.name then
-                        { ${"." + name + a.name} = a.value; }
-                      else if a.name == "extra-rules" then
-                        a.value
-                      else
-                        { ${"." + name}.${a.name} = a.value; };
-                  in
-                  l.recursiveUpdate acc
-                    (foldAttrs
-                       (acc': a:
-                          l.recursiveUpdate acc'
-                            (if l.hasPrefix "@" a.name then
-                               foldAttrs
-                                 (acc'': b:
-                                    l.recursiveUpdate acc''
-                                      (mapAttrs (_: v: { ${a.name} = v; }) (helper b))
-                                 )
-                                 {}
-                                 a.value
-                             else
-                               helper a
-                            )
-                       )
-                       {}
-                       value
-                    )
-               )
-               {}
-               config.classes
-            );
+          let
+            from-classes = modifier:
+              foldAttrs
+                (acc: { name, value }:
+                   let
+                     helper = a:
+                       let class-selector = modifier ".${name}"; in
+                       if l.hasPrefix ":" a.name then
+                         { ${class-selector + a.name} = a.value; }
+                       else if a.name == "extra-rules" then
+                         a.value
+                       else
+                         { ${class-selector}.${a.name} = a.value; };
+                   in
+                   l.recursiveUpdate acc
+                     (foldAttrs
+                        (acc': a:
+                           l.recursiveUpdate acc'
+                             (if l.hasPrefix "@" a.name then
+                                foldAttrs
+                                  (acc'': b:
+                                     l.recursiveUpdate acc''
+                                       (mapAttrs (_: v: { ${a.name} = v; }) (helper b))
+                                  )
+                                  {}
+                                  a.value
+                              else
+                                helper a
+                             )
+                        )
+                        {}
+                        value
+                     )
+                )
+                {};
+          in
+          l.mkMerge
+            [ { ":root" =
+                  l.mapAttrs'
+                    (n: v: l.nameValuePair ("--" + n) v)
+                    (l.filterAttrs
+                       (_: v: !(isAttrs v))
+                       config.variables
+                    );
+              }
+
+              (from-classes l.id config.classes.low-spec)
+              (from-classes (s: s + s) config.classes.high-spec)
+            ];
       };
   }
