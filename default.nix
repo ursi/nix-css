@@ -12,7 +12,7 @@
      { modules =
          [ { _module.args =
                { inherit pkgs;
-                 css-lib = import ./lib.nix;
+                 css-lib = import ./lib.nix pkgs.lib;
                };
            }
            ./module.nix

@@ -121,4 +121,26 @@ l:
         check = n: !(l.hasPrefix prefix n);
         inherit type;
       };
+
+    class-type =
+      let
+        checks =
+          [ { description = ''doesn't start with ":" or "@"'';
+              check = n: !(l.hasPrefix ":" n || l.hasPrefix "@" n);
+              type = css-value;
+            }
+
+            (prefix-check ":" declarations)
+          ];
+      in
+      checked-attrs
+        ([ (prefix-check "@" (checked-attrs checks))
+
+           { description = ''"extra-rules"'';
+             check = n: n == "extra-rules";
+             type = extra-rules-type;
+           }
+         ]
+         ++ checks
+        );
   }

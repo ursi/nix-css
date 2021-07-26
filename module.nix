@@ -10,7 +10,8 @@ with builtins;
       extra-rules-type
       checked-attrs
       prefix-check
-      no-prefix-check;
+      no-prefix-check
+      class-type;
 
     foldAttrs = f: init: attrs:
       foldl' f init (l.mapAttrsToList l.nameValuePair attrs);
@@ -34,30 +35,7 @@ with builtins;
           let
             make-classes = example-property: modifier:
               l.mkOption
-                { type =
-                    let
-                      checks =
-                        [ { description = ''doesn't start with ":" or "@"'';
-                            check = n: !(l.hasPrefix ":" n || l.hasPrefix "@" n);
-                            type = css-value;
-                          }
-
-                          (prefix-check ":" declarations)
-                        ];
-                    in
-                    attrs-of
-                      (checked-attrs
-                         ([ (prefix-check "@" (checked-attrs checks))
-
-                            { description = ''"extra-rules"'';
-                              check = n: n == "extra-rules";
-                              type = extra-rules-type;
-                            }
-                          ]
-                          ++ checks
-                         )
-                      );
-
+                { type = attrs-of class-type;
                   default = {};
 
                   apply =
