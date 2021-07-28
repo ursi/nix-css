@@ -57,22 +57,25 @@ l:
         };
 
     checked-attrs = checks:
+      let
+        name-type-pairs =
+          concatStringsSep "\n"
+            (map
+               (a:
+                  ''
+                  name: ${a.description}
+                  type: ${a.type.description}
+                  ''
+               )
+               checks
+            );
+      in
       l.mkOptionType
         { name = "checked-attrs";
           description =
             ''
             attribute set allowing the following attribute-value pairs:
-            ${concatStringsSep "\n"
-                (map
-                   (a:
-                      ''
-                      name: ${a.description}
-                      type: ${a.type.description}
-                      ''
-                   )
-                   checks
-                )
-            }
+            ${name-type-pairs}
             '';
 
           check = attrs:
@@ -105,7 +108,13 @@ l:
                   if type != null then
                     type.merge (loc ++ [ name ]) values
                   else
-                    abort "this should never be null if type checking is on"
+                    abort
+                      ''
+                      You are trying to merge a value whose name an value do no match any of the following name-type pairs:
+                      ${name-type-pairs}
+
+                      One potential cause of this might be that you're trying to merge a class that has been put into scope from `config.classes`, which has an `extra-rules` attribute. In this case `extra-rules` will no longer be a function, but an attribute set containing the result of the function. You may be able to get around this by using a recursive attribute set instead of relying on `config`.
+                      ''
                )
                file'd-values;
         };
