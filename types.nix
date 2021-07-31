@@ -35,7 +35,7 @@ l:
       in
       l.mkOptionType
         { name = "extra-rules-type";
-          description = "function from string to ${declarations.description}";
+          description = "function from string to ${type.description}";
 
           check = f:
             if isFunction f then type.check (f "class")
