@@ -21,9 +21,23 @@ with builtins;
           l.mkOption
             { type = checked-attrs [ (prefix-check "@" (attrs-of declarations)) ];
               default = {};
+              description = "An attrset of @-prefixed attributes whose values contain rules.";
+
+              example =
+                { "@media (min-width: 750px)" =
+                    { body =
+                        { font-size = "12px";
+                          margin = 0;
+                        };
+                    };
+                };
             };
 
-        bundle = l.mkOption { type = t.package; };
+        bundle =
+          l.mkOption
+            { type = t.package;
+              description = "A derivation containing the CSS file and all the imports.";
+            };
 
         charsets =
           l.mkOption
@@ -46,8 +60,21 @@ with builtins;
                            (n: v: if n == "extra-rules" then v selector else v)
                       );
 
+                  description =
+                    let
+                      other-property =
+                        if example-property == "low-spec" then "high-spec"
+                        else "low-spec";
+
+                      relative =
+                        if example-property == "low-spec" then "lower" else "higher";
+                    in
+                    ''Class names and corresponding declarations, plus a syntax for @-rules, pseudo-classes and pseudo-elements, and arbitray selectors as functions of the class name. These classes have ${relative} specificity than the classes in '${other-property}'. i.e. if a low-spec class's declaration collides with a declaration from high-spec, the high-spec one takes priority.
+                    '';
+
+
                   example =
-                    { classes.${example-property} =
+                    { ${example-property} =
                         { c1 =
                             { background = "red";
                               ":hover".background = "blue";
@@ -78,6 +105,7 @@ with builtins;
           l.mkOption
             { type = t.lines;
               default = "";
+              description = "Extra CSS added to the file.";
             };
 
         css-imports =
@@ -85,6 +113,7 @@ with builtins;
               l.mkOption
                 { type = t.listOf t.path;
                   default = [];
+                  description = "Paths of files that will be imported in the CSS file and included in the bundle.";
                 };
 
             directories =
@@ -93,24 +122,30 @@ with builtins;
                     t.listOf
                       (t.submodule
                          { options =
-                             { path = l.mkOption { type = t.path; };
+                             { path =
+                                 l.mkOption
+                                   { type = t.path;
+                                     description = "The path of the directory that contains the files to be imported.";
+                                   };
 
                                files =
                                  l.mkOption
                                    { type = t.listOf t.path;
-                                     description = "list of absolute paths corresponding to the paths of the files to be imported, if this directory is root";
+                                     description = "A List of absolute paths, relative to 'path', corresponding to the paths of the files to be imported.";
                                    };
                              };
                          }
                       );
 
                   default = [];
+                  description = "Directories and paths of files that will be imported in CSS and included in the bundle.";
                 };
 
             urls =
               l.mkOption
                 { type = t.listOf t.str;
                   default = [];
+                  description = "URLs that will be imported in the CSS file.";
                 };
           };
 
@@ -118,6 +153,7 @@ with builtins;
           l.mkOption
             { type = t.str;
               default = "main.css";
+              description = "The name of the main CSS file.";
             };
 
         rules =
@@ -131,6 +167,17 @@ with builtins;
                   );
 
               default = {};
+              description = "CSS rules as nix expressions, with a special syntax for @-rules.";
+              example =
+                { body =
+                    { background = "red";
+
+                      "@media (min-width: 750px)" =
+                        { font-size = "12px";
+                          margin = 0;
+                        };
+                    };
+                };
             };
 
         variables =
@@ -143,6 +190,16 @@ with builtins;
                   );
 
               default = {};
+              description = "CSS variables that will be added to :root, plus a syntax for @-rules";
+
+              example =
+                { red1 = "#f00000";
+
+                  font-size =
+                    { "@media (min-width: 751px)" = "16px";
+                      "@media (max-width: 750px)" = "12px";
+                    };
+                };
             };
       };
 
