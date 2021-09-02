@@ -212,7 +212,7 @@ with builtins;
               ${list-to-str (a: ''@import "${make-name a}";'') imps.paths}
 
               ${list-to-str
-                  ({ path, files}:
+                  ({ path, files }:
                      list-to-str (a: ''@import "${make-name path}${toString a}";'') files
                   )
                   imps.directories
