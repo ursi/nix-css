@@ -1,12 +1,13 @@
-{ pkgs
+{ module
+, pkgs
   ? import
       (fetchTarball
          { url = "https://github.com/NixOS/nixpkgs/archive/c7e7f90108ff7bb7924e6f70136dd72c0f916954.tar.gz";
            sha256 = "0k7y9zx37jsbqf2jh8gk6l4q8qv19lpnyqhigj54llz9s5c4zszp";
          }
       )
-      {}
-, module
+      { inherit system; }
+, system ? builtins.currentSystem
 }:
   (pkgs.lib.evalModules
      { modules =
