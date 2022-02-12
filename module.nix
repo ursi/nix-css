@@ -39,10 +39,10 @@ with builtins;
               description = "A derivation containing the CSS file and all the imports.";
             };
 
-        charsets =
+        charset =
           l.mkOption
-            { type = t.listOf t.str;
-              default = [];
+            { type = t.nullOr t.str;
+              default = null;
             };
 
         classes =
@@ -262,9 +262,10 @@ with builtins;
                     "";
 
                 set-to-rules = set-to-str make-rule;
-              in
+              in (if config.charset == null then "" else ''
+	        @charset "${config.charset}"
+	      '') +
               ''
-              ${list-to-str (a: ''@charset "${a}";'') config.charsets}
               ${list-to-str (a: ''@import "${a}";'') imps.urls}
               ${list-to-str (a: ''@import "${make-name a}";'') imps.paths}
 
