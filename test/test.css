@@ -1,0 +1,126 @@
+@charset "utf-8"
+
+@import "test.com";
+@import "aqq6w72fabwzhlfcdyavnrl4vib27fmy-style.css";
+
+@import "69f6s1ak9samjr5b4v3mqiajg6yzp3z4-font/fonts.css";
+
+.extra {
+  color: red;
+}
+
+.h1.h1 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.h1.h1 + .h1.h1 {
+  margin-top: 10px;
+}
+
+.h1.h1 > svg {
+  color: green;
+}
+
+.h1.h1:hover {
+  background: blue;
+}
+
+.l1 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.l1 + .l1 {
+  margin-top: 10px;
+}
+
+.l1 > svg {
+  color: green;
+}
+
+.l1:hover {
+  background: blue;
+}
+
+.more-extra.more-extra {
+  color: red;
+  pointer-events: none;
+}
+
+:root {
+  --font-size1: 16px;
+  --red1: red;
+}
+
+a {
+  text-decoration: none;
+}
+
+body {
+  font-size: var(--font-size1);
+}
+
+@media (max-width: 700px) {
+  .h1.h1 {
+    display: grid;
+  }
+
+  .h1.h1 > svg {
+    width: 60%;
+  }
+
+  .l1 {
+    display: grid;
+  }
+
+  .l1 > svg {
+    width: 60%;
+  }
+
+  :root {
+    --scale: 0.5;
+  }
+
+  body {
+    color: green;
+  }
+}
+
+@media (min-width: 701px) {
+  .h1.h1 {
+    color: green;
+    display: flex;
+  }
+
+  .h1.h1 > svg {
+    width: 30%;
+  }
+
+  .h1.h1:hover {
+    background: green;
+  }
+
+  .l1 {
+    color: green;
+    display: flex;
+  }
+
+  .l1 > svg {
+    width: 30%;
+  }
+
+  .l1:hover {
+    background: green;
+  }
+
+  :root {
+    --scale: 1;
+  }
+
+  body {
+    color: red;
+  }
+}
+
+/* comment */
