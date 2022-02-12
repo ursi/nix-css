@@ -262,10 +262,12 @@ with builtins;
                     "";
 
                 set-to-rules = set-to-str make-rule;
-              in (if config.charset == null then "" else ''
-	        @charset "${config.charset}"
-	      '') +
+              in
               ''
+              ${if isNull config.charset then ""
+                else ''@charset "${config.charset}"''
+              }
+
               ${list-to-str (a: ''@import "${a}";'') imps.urls}
               ${list-to-str (a: ''@import "${make-name a}";'') imps.paths}
 
