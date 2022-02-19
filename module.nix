@@ -262,37 +262,44 @@ with builtins;
                     "";
 
                 set-to-rules = set-to-str make-rule;
+
+                charset =
+                  if isNull config.charset then ""
+                  else ''@charset "${config.charset}"'';
+
+                imports =
+                  ''
+                  ${list-to-str (a: ''@import "${a}";'') imps.urls}
+                  ${list-to-str (a: ''@import "${make-name a}";'') imps.paths}
+
+                  ${list-to-str
+                      ({ path, files }:
+                         list-to-str (a: ''@import "${make-name path}${toString a}";'') files
+                      )
+                      imps.directories
+                  }
+                  '';
+
+                rules =
+                  set-to-rules
+                    (mapAttrs (_: l.filterAttrs (_: v: !(isAttrs v))) config.rules);
+
+                at-rules =
+                  set-to-str
+                    (n: v:
+                       ''
+                       ${n} {
+                         ${set-to-rules v}
+                       }
+                       ''
+                    )
+                    config.at-rules;
               in
               ''
-              ${if isNull config.charset then ""
-                else ''@charset "${config.charset}"''
-              }
-
-              ${list-to-str (a: ''@import "${a}";'') imps.urls}
-              ${list-to-str (a: ''@import "${make-name a}";'') imps.paths}
-
-              ${list-to-str
-                  ({ path, files }:
-                     list-to-str (a: ''@import "${make-name path}${toString a}";'') files
-                  )
-                  imps.directories
-              }
-
-              ${set-to-rules
-                  (mapAttrs (_: l.filterAttrs (_: v: !(isAttrs v))) config.rules)
-              }
-
-              ${set-to-str
-                  (n: v:
-                     ''
-                     ${n} {
-                       ${set-to-rules v}
-                     }
-                     ''
-                  )
-                  config.at-rules
-              }
-
+              ${charset}
+              ${imports}
+              ${rules}
+              ${at-rules}
               ${config.extra-css}
               '';
           in
