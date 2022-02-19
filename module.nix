@@ -5,13 +5,13 @@ with builtins;
 
     inherit (import ./types.nix lib)
       attrs-of
+      checked-attrs
+      class-type
       css-value
       declarations
       extra-rules-type
-      checked-attrs
       prefix-check
-      no-prefix-check
-      class-type;
+      no-prefix-check;
 
     foldAttrs = f: init: attrs:
       foldl' f init (l.mapAttrsToList l.nameValuePair attrs);
@@ -290,7 +290,7 @@ with builtins;
                      }
                      ''
                   )
-                  (config.at-rules)
+                  config.at-rules
               }
 
               ${config.extra-css}
