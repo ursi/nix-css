@@ -9,7 +9,6 @@ with builtins;
       class-type
       css-value
       declarations
-      extra-rules-type
       prefix-check
       no-prefix-check;
 
