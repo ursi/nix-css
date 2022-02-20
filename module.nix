@@ -205,38 +205,43 @@ with builtins;
 
     config =
       { at-rules =
-          l.recursiveUpdate
-            (foldAttrs
-                  (acc: { name, value }:
-                     l.recursiveUpdate acc
-                       (foldAttrs
-                          (acc': a:
-                             acc' // { ${a.name}.":root".${"--" + name} = a.value; }
-                          )
-                          {}
-                          value
-                       )
-                  )
-                  {}
-                  (l.filterAttrs (_: isAttrs) config.variables)
-            )
-            (foldAttrs
-               (acc: { name, value }:
-                  l.recursiveUpdate acc
-                    (foldAttrs
-                       (acc': a:
-                          if l.hasPrefix "@" a.name then
-                            l.recursiveUpdate acc' { ${a.name}.${name} = a.value; }
-                          else
-                            acc'
-                       )
-                       {}
-                       value
+          let
+            extracted-at-rules =
+              { rules =
+                  foldAttrs
+                    (acc: { name, value }:
+                       l.recursiveUpdate acc
+                         (foldAttrs
+                            (acc': a:
+                               if l.hasPrefix "@" a.name then
+                                 l.recursiveUpdate acc' { ${a.name}.${name} = a.value; }
+                               else
+                                 acc'
+                            )
+                            {}
+                            value
+                         )
                     )
-               )
-               {}
-               config.rules
-            );
+                    {}
+                    config.rules;
+
+                variables =
+                  foldAttrs
+                    (acc: { name, value }:
+                       l.recursiveUpdate acc
+                         (foldAttrs
+                            (acc': a:
+                               acc' // { ${a.name}.":root".${"--" + name} = a.value; }
+                            )
+                            {}
+                            value
+                         )
+                    )
+                    {}
+                    (l.filterAttrs (_: isAttrs) config.variables);
+              };
+          in
+          l.recursiveUpdate extracted-at-rules.rules extracted-at-rules.variables;
 
         bundle =
           let
@@ -326,34 +331,38 @@ with builtins;
               foldAttrs
                 (acc: { name, value }:
                    let
-                     helper = a:
-                       let class-selector = modifier ".${name}"; in
-                       if l.hasPrefix ":" a.name then
-                         { ${class-selector + a.name} = a.value; }
-                       else if a.name == "extra-rules" then
-                         a.value
-                       else
-                         { ${class-selector}.${a.name} = a.value; };
-                   in
-                   l.recursiveUpdate acc
-                     (foldAttrs
-                        (acc': a:
-                           l.recursiveUpdate acc'
-                             (if l.hasPrefix "@" a.name then
+                     class-rules =
+                       let
+                         helper = a:
+                           let class-selector = modifier ".${name}"; in
+                           if l.hasPrefix ":" a.name then
+                             { ${class-selector + a.name} = a.value; }
+                           else if a.name == "extra-rules" then
+                             a.value
+                           else
+                             { ${class-selector}.${a.name} = a.value; };
+                       in
+                       foldAttrs
+                         (acc': a:
+                            let
+                              extract-at-rules =
                                 foldAttrs
                                   (acc'': b:
                                      l.recursiveUpdate acc''
                                        (mapAttrs (_: v: { ${a.name} = v; }) (helper b))
                                   )
                                   {}
-                                  a.value
-                              else
-                                helper a
-                             )
-                        )
-                        {}
-                        value
-                     )
+                                  a.value;
+                            in
+                            l.recursiveUpdate acc'
+                              (if l.hasPrefix "@" a.name then extract-at-rules
+                               else helper a
+                              )
+                         )
+                         {}
+                         value;
+                   in
+                   l.recursiveUpdate acc class-rules
                 )
                 {};
           in
