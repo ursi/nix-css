@@ -62,7 +62,8 @@ with builtins;
                   description =
                     let
                       other-property =
-                        if example-property == "low-spec" then "high-spec"
+                        if example-property == "low-spec"
+                        then "high-spec"
                         else "low-spec";
 
                       relative =
@@ -268,7 +269,8 @@ with builtins;
                 set-to-rules = set-to-str make-rule;
 
                 charset =
-                  if isNull config.charset then ""
+                  if isNull config.charset
+                  then ""
                   else ''@charset "${config.charset}"'';
 
                 imports =
@@ -354,7 +356,8 @@ with builtins;
                                   a.value;
                             in
                             l.recursiveUpdate acc'
-                              (if l.hasPrefix "@" a.name then extract-at-rules
+                              (if l.hasPrefix "@" a.name
+                               then extract-at-rules
                                else helper a
                               )
                          )

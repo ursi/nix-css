@@ -38,7 +38,8 @@ l:
           description = "function from string to ${type.description}";
 
           check = f:
-            if isFunction f then type.check (f "class")
+            if isFunction f
+            then type.check (f "class")
             else false;
 
           merge = loc: defs:
