@@ -101,12 +101,12 @@
              "3".animation = [ "1s" "infinite" keyframes.animation ];
            };
        in
-       { low-spec =
+       { "1" =
            make-classes "l"
            // { extra.color = "red"; };
 
-         high-spec =
-           with config.classes.low-spec;
+         "2" =
+           with config.classes."1";
            make-classes "h"
            // { more-extra =
                   merge

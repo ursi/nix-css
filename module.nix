@@ -15,6 +15,9 @@ with builtins;
 
     foldAttrs = f: init: attrs:
       foldl' f init (l.mapAttrsToList l.nameValuePair attrs);
+
+    spec-values = l.range 1 9;
+    make-class-modifier = spec: str: l.concatMapStrings (l.const str) (l.range 1 spec);
   in
   { options =
       { at-rules =
@@ -47,7 +50,7 @@ with builtins;
 
         classes =
           let
-            make-classes = example-property: modifier:
+            make-classes = spec:
               l.mkOption
                 { type = attrs-of class-type;
                   default = {};
@@ -55,24 +58,17 @@ with builtins;
                   apply =
                     mapAttrs
                       (class-name:
-                         let selector = modifier ".${class-name}"; in
+                         let selector = make-class-modifier spec ".${class-name}"; in
                          mapAttrs
                            (n: v: if n == "extra-rules" then v selector else v)
                       );
 
                   description =
-                    let
-                      other-property =
-                        if example-property == "low-spec"
-                        then "high-spec"
-                        else "low-spec";
-
-                      relative =
-                        if example-property == "low-spec" then "lower" else "higher";
-                    in
-                    ''Class names and corresponding declarations, plus a syntax for @-rules, pseudo-classes and pseudo-elements, and arbitray selectors as functions of the class name. These classes have ${relative} specificity than the classes in '${other-property}'. i.e. if a low-spec class's declaration collides with a declaration from high-spec, the high-spec one takes priority.
+                    ''
+                    - Class names and corresponding declarations
+                    - Pseudo-classes, pseudo-elements, and @-rules
+                    - Arbitray selectors as functions of the class name
                     '';
-
 
                   example =
                     { ${example-property} =
@@ -97,10 +93,12 @@ with builtins;
                         };
                     };
                 };
+
+            toInt = fromJSON;
           in
-          { low-spec = make-classes "low-spec" l.id;
-            high-spec = make-classes "high-spec" (s: s + s);
-          };
+          l.genAttrs
+            (map toString spec-values)
+            (n: make-classes (toInt n));
 
         extra-css =
           l.mkOption
@@ -385,14 +383,14 @@ with builtins;
 
         rules =
           let
-            from-classes = modifier:
+            from-classes = spec:
               foldAttrs
                 (acc: { name, value }:
                    let
                      class-rules =
                        let
                          helper = a:
-                           let class-selector = modifier ".${name}"; in
+                           let class-selector = make-class-modifier spec ".${name}"; in
                            if l.hasPrefix ":" a.name then
                              { ${class-selector + a.name} = a.value; }
                            else if a.name == "extra-rules" then
@@ -426,17 +424,16 @@ with builtins;
                 {};
           in
           l.mkMerge
-            [ { ":root" =
+            ([ { ":root" =
                   l.mapAttrs'
                     (n: v: l.nameValuePair ("--" + n) v)
                     (l.filterAttrs
                        (_: v: !(isAttrs v))
                        config.variables
                     );
-              }
-
-              (from-classes l.id config.classes.low-spec)
-              (from-classes (s: s + s) config.classes.high-spec)
-            ];
+               }
+             ]
+             ++ map (spec: from-classes spec config.classes.${toString spec}) spec-values
+            );
       };
   }
