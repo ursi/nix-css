@@ -25,6 +25,27 @@
   background: blue;
 }
 
+.h2.h2 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.h2.h2 + .h2.h2 {
+  margin-top: 10px;
+}
+
+.h2.h2 > svg {
+  color: green;
+}
+
+.h2.h2.merge-all {
+  background: purple;
+}
+
+.h2.h2:hover {
+  background: blue;
+}
+
 .l1 {
   background: var(--red1);
   font-family: sans-serif;
@@ -39,6 +60,27 @@
 }
 
 .l1:hover {
+  background: blue;
+}
+
+.l2 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.l2 + .l2 {
+  margin-top: 10px;
+}
+
+.l2 > svg {
+  color: green;
+}
+
+.l2.merge-all {
+  background: purple;
+}
+
+.l2:hover {
   background: blue;
 }
 
@@ -91,11 +133,27 @@ body {
     width: 60%;
   }
 
+  .h2.h2 {
+    display: grid;
+  }
+
+  .h2.h2 > svg {
+    width: 60%;
+  }
+
   .l1 {
     display: grid;
   }
 
   .l1 > svg {
+    width: 60%;
+  }
+
+  .l2 {
+    display: grid;
+  }
+
+  .l2 > svg {
     width: 60%;
   }
 
@@ -122,6 +180,19 @@ body {
     background: green;
   }
 
+  .h2.h2 {
+    color: green;
+    display: flex;
+  }
+
+  .h2.h2 > svg {
+    width: 30%;
+  }
+
+  .h2.h2:hover {
+    background: green;
+  }
+
   .l1 {
     color: green;
     display: flex;
@@ -132,6 +203,19 @@ body {
   }
 
   .l1:hover {
+    background: green;
+  }
+
+  .l2 {
+    color: green;
+    display: flex;
+  }
+
+  .l2 > svg {
+    width: 30%;
+  }
+
+  .l2:hover {
     background: green;
   }
 

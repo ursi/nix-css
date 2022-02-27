@@ -1,7 +1,7 @@
 { config, css-lib, pkgs, ... }:
    let
      l = pkgs.lib;
-     inherit (css-lib) make-keyframes-names make-var-values merge;
+     inherit (css-lib) make-keyframes-names make-var-values merge merge-all;
      inherit (css-lib.media) gt leq;
      desktop = gt 700;
      mobile = leq 700;
@@ -60,34 +60,44 @@
              test-classes;
 
          test-classes =
-           { "1" =
-               merge
-                 [ { background = v.red1;
-                     ":hover".background = "blue";
+           let
+             merged =
+               [ { background = v.red1;
+                   ":hover".background = "blue";
 
-                     ${desktop} =
-                       { display = "flex";
-                         ":hover".background = "green";
+                   ${desktop} =
+                     { display = "flex";
+                       ":hover".background = "green";
+                     };
+
+                   ${mobile}.display = "grid";
+                 }
+
+                 { font-family = "sans-serif"; }
+                 { ${desktop}.color = "green"; }
+               ];
+
+             extra-rules =
+               { extra-rules = c:
+                   { "${c} > svg" =
+                       { color = "green";
+                         ${desktop}.width = "30%";
+                         ${mobile}.width = "60%";
                        };
 
-                     ${mobile}.display = "grid";
-                   }
+                     "${c} + ${c}".margin-top = "10px";
+                   };
+               };
+           in
+           { "1" = merge merged // extra-rules;
 
-                   { font-family = "sans-serif"; }
-                   { ${desktop}.color = "green"; }
-                 ]
-                 // { extra-rules = c:
-                        { "${c} > svg" =
-                            { color = "green";
-                              ${desktop}.width = "30%";
-                              ${mobile}.width = "60%";
-                            };
+             "2" = merge-all
+               (merged
+                ++ [ extra-rules
+                     { extra-rules = c: { "${c}.merge-all".background = "purple"; }; }
+                   ]
+               );
 
-                          "${c} + ${c}".margin-top = "10px";
-                        };
-                    };
-
-             "2".animation = "1s infinite ${keyframes.animation}";
            };
        in
        { low-spec =
