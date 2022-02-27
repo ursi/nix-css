@@ -98,6 +98,7 @@
                    ]
                );
 
+             "3".animation = [ "1s" "infinite" keyframes.animation ];
            };
        in
        { low-spec =
