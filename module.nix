@@ -300,7 +300,7 @@ with builtins;
                 charset =
                   if isNull config.charset
                   then ""
-                  else ''@charset "${config.charset}"'';
+                  else ''@charset "${config.charset}";'';
 
                 imports =
                   ''
