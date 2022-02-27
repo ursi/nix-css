@@ -153,4 +153,21 @@ l:
          ]
          ++ checks
         );
+
+    percentage =
+      l.mkOptionType
+        { name = "percentage";
+          description = "a number followed by a %";
+          check = n: !isNull (match ''([0-9]+|[0-9]*\.[0-9]+)%'' n);
+        };
+
+    keyframes =
+      attrs-of
+        (checked-attrs
+           [ { description = "percentage";
+               check = n: percentage.check n;
+               type = declarations;
+             }
+           ]
+        );
   }

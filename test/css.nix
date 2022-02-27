@@ -42,6 +42,15 @@
            };
        };
 
+     keyframes.animation =
+       let small = "16px"; big = "32px"; in
+       { "0%".font-size = small;
+         "25%".font-size = big;
+         "50%".font-size = small;
+         "75%".font-size = big;
+         "100%".font-size = small;
+       };
+
      classes =
        let
          make-classes = prefix:

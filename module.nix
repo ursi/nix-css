@@ -9,6 +9,7 @@ with builtins;
       class-type
       css-value
       declarations
+      keyframes
       prefix-check
       no-prefix-check;
 
@@ -149,6 +150,23 @@ with builtins;
                 };
           };
 
+        keyframes =
+          l.mkOption
+            { type = keyframes;
+              default = {};
+              description = "@keyframes rules";
+
+              example =
+                { font-size-wiggle =
+                    { "0%".font-size = "16px";
+                      "25%".font-size = "32px";
+                      "50%".font-size = "16px";
+                      "75%".font-size = "32px";
+                      "100%".font-size = "16px";
+                    };
+                };
+            };
+
         main =
           l.mkOption
             { type = t.str;
@@ -240,8 +258,19 @@ with builtins;
                     {}
                     (l.filterAttrs (_: isAttrs) config.variables);
               };
+
+            keyframes =
+              l.mapAttrs'
+                (n: l.nameValuePair "@keyframes ${n}")
+                config.keyframes;
           in
-          l.recursiveUpdate extracted-at-rules.rules extracted-at-rules.variables;
+          l.pipe {}
+            (map l.recursiveUpdate
+               [ extracted-at-rules.rules
+                 extracted-at-rules.variables
+                 keyframes
+               ]
+            );
 
         bundle =
           let
@@ -291,11 +320,39 @@ with builtins;
                     (mapAttrs (_: l.filterAttrs (_: v: !(isAttrs v))) config.rules);
 
                 at-rules =
+                  let
+                    build-keyframes = set:
+                      let toNumber = pc: fromJSON (l.removeSuffix "%" pc); in
+                      l.pipe set
+                        [ (l.mapAttrs'
+                             (n: v:
+                                l.nameValuePair
+                                  (if n == "from" then "0%"
+                                   else if n == "to" then "100%"
+                                   else n
+                                  )
+                                  v
+                             )
+                          )
+
+                          (l.mapAttrsToList l.nameValuePair)
+                          (sort (a: b: toNumber a.name < toNumber b.name))
+
+                          (l.concatMapStringsSep "\n"
+                             ({ name, value }: make-rule name value)
+                          )
+                        ];
+                  in
                   set-to-str
                     (n: v:
                        ''
                        ${n} {
-                         ${set-to-rules v}
+                         ${(if l.hasPrefix "@keyframes" n
+                            then build-keyframes
+                            else set-to-rules
+                           )
+                             v
+                         }
                        }
                        ''
                     )
