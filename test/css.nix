@@ -5,7 +5,7 @@
      inherit (css-lib.media) gt leq;
      desktop = gt 700;
      mobile = leq 700;
-     v = make-var-values config.variables;
+     v = make-var-values config;
    in
    { css-imports =
        { urls = [ "test.com" ];

@@ -26,7 +26,7 @@ lib:
         leq = px: "@media (max-width: ${toString px}px)";
       };
 
-    make-var-values = mapAttrs (n: _: "var(--${n})");
+    make-var-values = config: mapAttrs (n: _: "var(--${n})") config.variables;
 
     merge =
       merge-with-check
