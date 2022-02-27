@@ -26,6 +26,7 @@ lib:
         leq = px: "@media (max-width: ${toString px}px)";
       };
 
+    make-keyframes-names = config: mapAttrs l.const config.keyframes;
     make-var-values = config: mapAttrs (n: _: "var(--${n})") config.variables;
 
     merge =

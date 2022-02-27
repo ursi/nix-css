@@ -1,11 +1,12 @@
 { config, css-lib, pkgs, ... }:
    let
      l = pkgs.lib;
-     inherit (css-lib) make-var-values merge;
+     inherit (css-lib) make-keyframes-names make-var-values merge;
      inherit (css-lib.media) gt leq;
      desktop = gt 700;
      mobile = leq 700;
      v = make-var-values config;
+     keyframes = make-keyframes-names config;
    in
    { css-imports =
        { urls = [ "test.com" ];
@@ -85,6 +86,8 @@
                           "${c} + ${c}".margin-top = "10px";
                         };
                     };
+
+             "2".animation = "1s infinite ${keyframes.animation}";
            };
        in
        { low-spec =
