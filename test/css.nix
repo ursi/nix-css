@@ -1,3 +1,4 @@
+with builtins;
 { config, css-lib, pkgs, ... }:
    let
      l = pkgs.lib;
@@ -112,5 +113,14 @@
                       { pointer-events = "none";}
                     ];
               };
-       };
+       }
+       // listToAttrs
+            (map
+               (spec:
+                  l.nameValuePair
+                    (toString spec)
+                    ({ c.z-index = spec; })
+               )
+               (l.range 3 9)
+            );
    }
