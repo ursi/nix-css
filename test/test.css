@@ -8,93 +8,93 @@
   color: red;
 }
 
-.h1.h1 {
-  background: var(--red1);
-  font-family: sans-serif;
-}
-
-.h1.h1 + .h1.h1 {
-  margin-top: 10px;
-}
-
-.h1.h1 > svg {
-  color: green;
-}
-
-.h1.h1:hover {
-  background: blue;
-}
-
-.h2.h2 {
-  background: var(--red1);
-  font-family: sans-serif;
-}
-
-.h2.h2 + .h2.h2 {
-  margin-top: 10px;
-}
-
-.h2.h2 > svg {
-  color: green;
-}
-
-.h2.h2.merge-all {
-  background: purple;
-}
-
-.h2.h2:hover {
-  background: blue;
-}
-
-.h3.h3 {
-  animation: 1s infinite animation;
-}
-
-.l1 {
-  background: var(--red1);
-  font-family: sans-serif;
-}
-
-.l1 + .l1 {
-  margin-top: 10px;
-}
-
-.l1 > svg {
-  color: green;
-}
-
-.l1:hover {
-  background: blue;
-}
-
-.l2 {
-  background: var(--red1);
-  font-family: sans-serif;
-}
-
-.l2 + .l2 {
-  margin-top: 10px;
-}
-
-.l2 > svg {
-  color: green;
-}
-
-.l2.merge-all {
-  background: purple;
-}
-
-.l2:hover {
-  background: blue;
-}
-
-.l3 {
-  animation: 1s infinite animation;
-}
-
 .more-extra.more-extra {
   color: red;
   pointer-events: none;
+}
+
+.spec1-1 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.spec1-1 + .spec1-1 {
+  margin-top: 10px;
+}
+
+.spec1-1 > svg {
+  color: green;
+}
+
+.spec1-1:hover {
+  background: blue;
+}
+
+.spec1-2 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.spec1-2 + .spec1-2 {
+  margin-top: 10px;
+}
+
+.spec1-2 > svg {
+  color: green;
+}
+
+.spec1-2.merge-all {
+  background: purple;
+}
+
+.spec1-2:hover {
+  background: blue;
+}
+
+.spec1-3 {
+  animation: 1s infinite animation;
+}
+
+.spec2-1.spec2-1 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.spec2-1.spec2-1 + .spec2-1.spec2-1 {
+  margin-top: 10px;
+}
+
+.spec2-1.spec2-1 > svg {
+  color: green;
+}
+
+.spec2-1.spec2-1:hover {
+  background: blue;
+}
+
+.spec2-2.spec2-2 {
+  background: var(--red1);
+  font-family: sans-serif;
+}
+
+.spec2-2.spec2-2 + .spec2-2.spec2-2 {
+  margin-top: 10px;
+}
+
+.spec2-2.spec2-2 > svg {
+  color: green;
+}
+
+.spec2-2.spec2-2.merge-all {
+  background: purple;
+}
+
+.spec2-2.spec2-2:hover {
+  background: blue;
+}
+
+.spec2-3.spec2-3 {
+  animation: 1s infinite animation;
 }
 
 :root {
@@ -133,35 +133,35 @@ body {
 }
 
 @media (max-width: 700px) {
-  .h1.h1 {
+  .spec1-1 {
     display: grid;
   }
 
-  .h1.h1 > svg {
+  .spec1-1 > svg {
     width: 60%;
   }
 
-  .h2.h2 {
+  .spec1-2 {
     display: grid;
   }
 
-  .h2.h2 > svg {
+  .spec1-2 > svg {
     width: 60%;
   }
 
-  .l1 {
+  .spec2-1.spec2-1 {
     display: grid;
   }
 
-  .l1 > svg {
+  .spec2-1.spec2-1 > svg {
     width: 60%;
   }
 
-  .l2 {
+  .spec2-2.spec2-2 {
     display: grid;
   }
 
-  .l2 > svg {
+  .spec2-2.spec2-2 > svg {
     width: 60%;
   }
 
@@ -175,55 +175,55 @@ body {
 }
 
 @media (min-width: 701px) {
-  .h1.h1 {
+  .spec1-1 {
     color: green;
     display: flex;
   }
 
-  .h1.h1 > svg {
+  .spec1-1 > svg {
     width: 30%;
   }
 
-  .h1.h1:hover {
+  .spec1-1:hover {
     background: green;
   }
 
-  .h2.h2 {
+  .spec1-2 {
     color: green;
     display: flex;
   }
 
-  .h2.h2 > svg {
+  .spec1-2 > svg {
     width: 30%;
   }
 
-  .h2.h2:hover {
+  .spec1-2:hover {
     background: green;
   }
 
-  .l1 {
+  .spec2-1.spec2-1 {
     color: green;
     display: flex;
   }
 
-  .l1 > svg {
+  .spec2-1.spec2-1 > svg {
     width: 30%;
   }
 
-  .l1:hover {
+  .spec2-1.spec2-1:hover {
     background: green;
   }
 
-  .l2 {
+  .spec2-2.spec2-2 {
     color: green;
     display: flex;
   }
 
-  .l2 > svg {
+  .spec2-2.spec2-2 > svg {
     width: 30%;
   }
 
-  .l2:hover {
+  .spec2-2.spec2-2:hover {
     background: green;
   }
 

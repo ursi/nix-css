@@ -54,9 +54,9 @@
 
      classes =
        let
-         make-classes = prefix:
+         make-classes = spec:
            l.mapAttrs'
-             (n: v: l.nameValuePair (prefix + n) v)
+             (n: v: l.nameValuePair ("spec${toString spec}-${n}") v)
              test-classes;
 
          test-classes =
@@ -101,13 +101,11 @@
              "3".animation = [ "1s" "infinite" keyframes.animation ];
            };
        in
-       { "1" =
-           make-classes "l"
-           // { extra.color = "red"; };
+       { "1" = make-classes 1 // { extra.color = "red"; };
 
          "2" =
            with config.classes."1";
-           make-classes "h"
+           make-classes 2
            // { more-extra =
                   merge
                     [ extra
