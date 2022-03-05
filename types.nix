@@ -14,11 +14,17 @@ l:
                allAttrs (b: type.check b.value) a
              else
                false;
+
+           description = l.removeSuffix "s" (t.attrsOf type).description;
          };
+
+    list-of = type:
+      let type' = t.listOf type; in
+      type' // { description = l.removeSuffix "s" type'.description; };
 
     css-value =
       let atom = t.oneOf [ t.str t.int t.float ]; in
-      t.either atom (t.listOf atom);
+      t.either atom (list-of atom);
 
     declarations = attrs-of css-value;
 
@@ -59,20 +65,31 @@ l:
 
     checked-attrs = checks:
       let
+        indent = spaces: str:
+            l.pipe str
+            [ (split "\n")
+              (filter isString)
+
+              (l.concatMapStringsSep "\n"
+                 (a: if a == ""
+                     then ""
+                     else (l.concatMapStrings (l.const " ") (l.range 1 spaces)) + a))
+            ];
+
         name-type-pairs =
-          concatStringsSep "\n"
-            (map
-               (a:
-                  ''
-                  name: ${a.description}
-                  type: ${a.type.description}
-                  ''
-               )
-               checks
-            );
+           indent 4
+             (concatStringsSep "\n"
+                (map
+                   (a:
+                      ''
+                      name: ${a.description}
+                      type: ${a.type.description}
+                      '')
+                 checks));
       in
       l.mkOptionType
         { name = "checked-attrs";
+
           description =
             ''
             attribute set allowing the following attribute-value pairs:

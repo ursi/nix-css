@@ -10,6 +10,7 @@ with builtins;
       css-value
       declarations
       keyframes
+      list-of
       prefix-check
       no-prefix-check;
 
@@ -110,7 +111,7 @@ with builtins;
         css-imports =
           { paths =
               l.mkOption
-                { type = t.listOf t.path;
+                { type = list-of t.path;
                   default = [];
                   description = "Paths of files that will be imported in the CSS file and included in the bundle.";
                 };
@@ -118,7 +119,7 @@ with builtins;
             directories =
               l.mkOption
                 { type =
-                    t.listOf
+                    list-of
                       (t.submodule
                          { options =
                              { path =
@@ -129,7 +130,7 @@ with builtins;
 
                                files =
                                  l.mkOption
-                                   { type = t.listOf t.path;
+                                   { type = list-of t.path;
                                      description = "A List of absolute paths, relative to 'path', corresponding to the paths of the files to be imported.";
                                    };
                              };
@@ -142,7 +143,7 @@ with builtins;
 
             urls =
               l.mkOption
-                { type = t.listOf t.str;
+                { type = list-of t.str;
                   default = [];
                   description = "URLs that will be imported in the CSS file.";
                 };
