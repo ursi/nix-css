@@ -89,6 +89,21 @@
         "type": "github"
       }
     },
+    "nix-html": {
+      "locked": {
+        "lastModified": 1643926839,
+        "narHash": "sha256-DGDz/Q8t/TfWhRMlvgRjWCqfPcuKKORUFP7WdM65mv0=",
+        "owner": "ursi",
+        "repo": "nix-html",
+        "rev": "8dcc018e5c3149084eb6c4d0c19f45beda68c4e5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ursi",
+        "repo": "nix-html",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1644525281,
@@ -153,6 +168,7 @@
       "inputs": {
         "deadnix": "deadnix",
         "make-shell": "make-shell",
+        "nix-html": "nix-html",
         "nixpkgs": "nixpkgs_4",
         "utils": "utils_2"
       }

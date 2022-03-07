@@ -72,7 +72,7 @@ with builtins;
                     '';
 
                   example =
-                    { ${example-property} =
+                    { something =
                         { c1 =
                             { background = "red";
                               ":hover".background = "blue";
