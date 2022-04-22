@@ -1,7 +1,8 @@
 { inputs =
     { deadnix.url = "github:astro/deadnix";
       make-shell.url = "github:ursi/nix-make-shell/1";
-      nix-html.url = "github:ursi/nix-html";
+      nix-html.url = "path:/home/mason/work/platonic/nix-html/nix-html";
+      # nix-html.url = "github:ursi/nix-html";
       nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
       utils.url = "github:ursi/flake-utils/8";
     };
@@ -16,7 +17,7 @@
             };
     }
     // (utils.apply-systems { inherit inputs; }
-          ({ deadnix, make-shell, pkgs, ... }:
+          ({ deadnix, make-shell, nix-html, pkgs, ... }:
              let l = p.lib; p = pkgs; in
              { devShell =
                  make-shell
@@ -27,6 +28,7 @@
                packages.docs =
                  let
                    l = p.lib ;p = pkgs;
+                   example-strings = import ./example-strings.nix;
 
                    options =
                      (l.evalModules
@@ -75,7 +77,13 @@
                                     ${fst}: (also classes."2", ... classes."9")
                                     ${snd.description or ":("}
                                     type: ${snd.type.description}
-                                    default: ${toJSON snd.default or ":("}
+                                    ${if snd?default
+                                      then "default: ${toJSON snd.default}"
+                                      else ""
+                                    }
+
+                                    example:
+                                    ${example-strings.${fst} or ":("}
                                     '';
                                 }
                            else
@@ -91,6 +99,9 @@
                                     then "default: ${toJSON snd.default}"
                                     else ""
                                   }
+
+                                  example:
+                                  ${example-strings.${fst} or ":("}
                                   '';
                               }
                        )
@@ -100,6 +111,13 @@
                  p.writeText "docs"
                    (l.concatStringsSep "\n"
                       (l.mapAttrsToList (_: v: v) something));
+
+               packages.lib-docs =
+                 import ./docs.nix
+                   { h = nix-html.html;
+                     library = import ./lib.nix pkgs.lib;
+                     inherit pkgs;
+                   };
 
                # packages.docs' =
                #   (l.evalModules
