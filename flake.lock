@@ -186,7 +186,7 @@
         "utils": "utils_3"
       },
       "locked": {
-        "narHash": "sha256-LiCTBFzKwcjJgw7FqlCebBvmbpuv4OdD6sYJDfOhI/8=",
+        "narHash": "sha256-KdkKk/QhENfo2DZsXk00E9HRWoOjoC89aURrQthYCB0=",
         "path": "/home/mason/work/platonic/nix-html/nix-html",
         "type": "path"
       },
