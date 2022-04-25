@@ -30,6 +30,7 @@ lib:
             notes =
               ''
               Meant to be used with `leq`, `gt`, and itself:
+
               ```
               ''${leq 600}.font-size = 16px;
               ''${between 600 700}.font-size = 20px;
@@ -60,6 +61,7 @@ lib:
             notes =
               ''
               Meant to be used with `lt`, `geq`, and itself:
+
               ```
               ''${lt 600}.font-size = 16px;
               ''${between 600 700}.font-size = 20px;
@@ -161,22 +163,71 @@ lib:
         examples =
           [ ''(make-var-value { variables.name = "green"; }).name = "var(--name)"'' ];
 
-        __functor = _: config: mapAttrs (n: _: "var(--${n})") config.variables;
+        # __functor = _: config: mapAttrs (n: _: "var(--${n})") config.variables;
       };
 
     merge =
-      merge-with-check
-        (all (a: !a?extra-rules))
-        ''
-        You are trying to merge classes that define `extra-rules`. This is not allowed by default, as it can easily have unintended side effects if you're not careful. To get around this, you can use the function `css-lib.${merge-allowing-extra-rules-name}`. However, if you only need to merge classes without `extra-rules` into an attribute set literal that has `extra-rules`, it is recommended that you do the following:
+      { args =
+          [ { name = "rules";
+              description = "A set of declarations that do not have an `extra-rules` attribute";
+            }
+          ];
 
-            merge
-              [ class1
-                class2
-                { ... }
-              ]
-            // { extra-rules = c: { ... }; }
+        notes =
+        ''
+        This is preferable to // because it'll throw an error if you have confilictin declarations.
+
+        Allowing `extra-rules` can easily have unintended side effects, so they are prohibited in this function. If you feel you need it, you can use `${merge-allowing-extra-rules-name}`. In most cases though, you can just do the following:
+
+        ```
+        merge
+          [ class1
+            class2
+            { ... }
+          ]
+        // { extra-rules = c: { ... }; }
+        ```
         '';
 
-    ${merge-allowing-extra-rules-name} = merge-with-check (l.const true) "";
+        returns = "A set of declarations that is the combination of the arguments";
+
+        examples =
+          [ ''
+            merge [ { color = "black"; } { font-size = "16px"; } ]
+            == { color = black; font-size = "16px" }
+            ''
+          ];
+
+        __functor = _:
+          merge-with-check
+            (all (a: !a?extra-rules))
+            ''
+            You are trying to merge classes that define `extra-rules`. This is not allowed by default, as it can easily have unintended side effects if you're not careful. To get around this, you can use the function `css-lib.${merge-allowing-extra-rules-name}`. However, if you only need to merge classes without `extra-rules` into an attribute set literal that has `extra-rules`, it is recommended that you do the following:
+
+                merge
+                  [ class1
+                    class2
+                    { ... }
+                  ]
+                // { extra-rules = c: { ... }; }
+            '';
+      };
+
+    ${merge-allowing-extra-rules-name} =
+      { args =
+          [ { name = "rules";
+              description = "A set of declarations";
+            }
+          ];
+
+        returns = "null";
+
+        examples =
+          [ ''
+            ${merge-allowing-extra-rules-name} [ { color = "black"; } { font-size = "16px"; } ]
+            == { color = black; font-size = "16px" }''
+          ];
+
+        __functor = _: merge-with-check (l.const true) "";
+      };
   }

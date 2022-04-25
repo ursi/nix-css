@@ -1,6 +1,7 @@
 { inputs =
     { deadnix.url = "github:astro/deadnix";
       make-shell.url = "github:ursi/nix-make-shell/1";
+      doc-gen.url = "path:/home/mason/git/nix-doc-gen";
       nix-html.url = "path:/home/mason/work/platonic/nix-html/nix-html";
       # nix-html.url = "github:ursi/nix-html";
       nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -17,7 +18,7 @@
             };
     }
     // (utils.apply-systems { inherit inputs; }
-          ({ deadnix, make-shell, nix-html, pkgs, ... }:
+          ({ deadnix, make-shell, doc-gen, nix-html, pkgs, ... }:
              let l = p.lib; p = pkgs; in
              { devShell =
                  make-shell
@@ -112,12 +113,7 @@
                    (l.concatStringsSep "\n"
                       (l.mapAttrsToList (_: v: v) something));
 
-               packages.lib-docs =
-                 import ./docs.nix
-                   { h = nix-html.html;
-                     library = import ./lib.nix pkgs.lib;
-                     inherit pkgs;
-                   };
+               packages.lib-docs = doc-gen (import ./lib.nix pkgs.lib);
 
                # packages.docs' =
                #   (l.evalModules
