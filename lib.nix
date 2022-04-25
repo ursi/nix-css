@@ -220,7 +220,7 @@ lib:
             }
           ];
 
-        returns = "null";
+        returns = "A set of declarations that is the combination of the arguments";
 
         examples =
           [ ''
