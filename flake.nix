@@ -1,7 +1,7 @@
 { inputs =
     { deadnix.url = "github:astro/deadnix";
-      make-shell.url = "github:ursi/nix-make-shell/1";
       doc-gen.url = "path:/home/mason/git/nix-doc-gen";
+      make-shell.url = "github:ursi/nix-make-shell/1";
       nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
       utils.url = "github:ursi/flake-utils/8";
     };
@@ -107,9 +107,7 @@
                        {}
                        (flatten options);
                  in
-                 p.writeText "docs"
-                   (l.concatStringsSep "\n"
-                      (l.mapAttrsToList (_: v: v) something));
+                 doc-gen.options { inherit options; };
 
                packages.lib-docs = doc-gen (import ./lib.nix pkgs.lib);
 
