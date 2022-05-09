@@ -2,8 +2,6 @@
     { deadnix.url = "github:astro/deadnix";
       make-shell.url = "github:ursi/nix-make-shell/1";
       doc-gen.url = "path:/home/mason/git/nix-doc-gen";
-      nix-html.url = "path:/home/mason/work/platonic/nix-html/nix-html";
-      # nix-html.url = "github:ursi/nix-html";
       nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
       utils.url = "github:ursi/flake-utils/8";
     };
@@ -18,7 +16,7 @@
             };
     }
     // (utils.apply-systems { inherit inputs; }
-          ({ deadnix, make-shell, doc-gen, nix-html, pkgs, ... }:
+          ({ deadnix, make-shell, doc-gen, pkgs, ... }:
              let l = p.lib; p = pkgs; in
              { devShell =
                  make-shell
