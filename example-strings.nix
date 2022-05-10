@@ -21,11 +21,7 @@
             };
 
           extra-rules = c:
-            { "''${c} > svg" =
-                { fill = "blue";
-                    ''${mobile}.width = "10px";
-                };
-            };
+            { "''${c} > svg".fill = "blue"; };
         };
 
       c2.color = "purple";

@@ -166,7 +166,7 @@ with builtins;
 
               default = {};
               description = "CSS variables that will be added to :root, plus a syntax for @-rules";
-              example = example.variables;
+              example = examples.variables;
             };
       };
 
