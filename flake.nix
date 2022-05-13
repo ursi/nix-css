@@ -107,7 +107,14 @@
                        {}
                        (flatten options);
                  in
-                 doc-gen.options { inherit options; };
+                 doc-gen.options
+                   { options =
+                       options
+                       // { classes."1" = options.classes."1"; };
+                       # // { ${''classes.1, ... , classes.9''} = options.classes."1"; };
+
+                     examples = { path, ... }: example-strings.${path};
+                   };
 
                packages.lib-docs = doc-gen (import ./lib.nix pkgs.lib);
 

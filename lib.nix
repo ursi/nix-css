@@ -163,7 +163,7 @@ lib:
         examples =
           [ ''(make-var-value { variables.name = "green"; }).name = "var(--name)"'' ];
 
-        # __functor = _: config: mapAttrs (n: _: "var(--${n})") config.variables;
+        __functor = _: config: mapAttrs (n: _: "var(--${n})") config.variables;
       };
 
     merge =
